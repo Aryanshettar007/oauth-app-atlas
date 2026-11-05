@@ -28,9 +28,7 @@ export default async function Home() {
               quota or scopes, you register your own with the provider. Each guide shows the hands-on time, the approval wait, what can block you,
               and which steps an agent can do for you.
             </p>
-            <div className="[&_input]:bg-[var(--surface)] [&_input]:text-[var(--ink)] [&_input]:border-transparent">
-              <GenerateBox />
-            </div>
+            <GenerateBox />
             <dl className="grid grid-cols-3 gap-4 pt-2 max-w-lg font-mono">
               {[
                 [String(TOOLKITS.length), "top OAuth toolkits"],

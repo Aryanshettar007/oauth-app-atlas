@@ -87,3 +87,17 @@ h1, h2, h3 { text-wrap: balance; letter-spacing: -0.02em; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 @keyframes pulse-dot { 0%,100% { opacity: .35 } 50% { opacity: 1 } }
 .pulse { animation: pulse-dot 1.2s ease-in-out infinite; }
+
+/* Search bar: a visible field on any surface, gradient outline on focus. */
+.search-bar {
+  background: #0f0f0f;
+  border: 1px solid #3a3a3a;
+  border-radius: 14px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.search-bar:hover { border-color: #4a4a4a; }
+.search-bar:focus-within {
+  border-color: transparent;
+  background: linear-gradient(#0f0f0f, #0f0f0f) padding-box, var(--grad) border-box;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--grad-mid) 18%, transparent);
+}
