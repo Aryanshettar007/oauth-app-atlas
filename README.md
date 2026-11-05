@@ -4,7 +4,7 @@ For any Composio toolkit, it answers two questions. Can I ship on Composio's man
 
 The library lists Composio's 100 most popular OAuth toolkits. For any other app (a name or a website), an agent researches the provider live, checks its real OAuth endpoints, and writes a guide you can share.
 
-- **Live app:** https://oauth-app-atlas.vercel.app · reviewed guides: [Gmail](https://oauth-app-atlas.vercel.app/apps/gmail) (Hard), [GitHub](https://oauth-app-atlas.vercel.app/apps/github) (Easy)
+- **Live app:** https://oauth-app-atlas.vercel.app · reviewed guides: [GitHub](https://oauth-app-atlas.vercel.app/apps/github) (Easy), [X / Twitter](https://oauth-app-atlas.vercel.app/apps/twitter) (Moderate, bring your own), [Gmail](https://oauth-app-atlas.vercel.app/apps/gmail) (Hard)
 - **Source:** https://github.com/Aryanshettar007/oauth-app-atlas
 - **Author:** Aryan Shettar (aryanshettar007@gmail.com, [aryanshettar.tech](https://aryanshettar.tech)). Short Technical Assessment, Product Intern, Composio
 
@@ -123,10 +123,12 @@ Stored: curated guides in data/guides/*.json (in the repo);
 | GitHub (run live on production) | Organization OAuth access restrictions: medium likelihood | Enabled by default for every new organization ([GitHub docs](https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions)) | Raised to high |
 | GitHub (run live on production) | Own app gives "2,000 token requests per hour" | No source; GitHub documents 10 new tokens/hour and 5,000 API requests/hour per user | Removed and replaced |
 | GitHub (run live on production) | PKCE S256, no review, 8 h / 6-month tokens, 10-token cap | Matches GitHub docs | Confirmed. With search, the earlier PKCE error didn't recur. |
+| X / Twitter (run live on production) | PKCE required; 30 s codes; 2 h tokens; `offline.access` for refresh; Free tier gone; DM/write scopes show a "sensitive permissions" warning | Matches X's OAuth docs, its probe (token endpoint demands `code_verifier`), and X's developer-forum announcements | Confirmed. Composio's default X scopes include `dm.read` and `tweet.write`, so every Composio user bringing their own X app gets that warning. |
+| X / Twitter (run live on production) | Only Enterprise ($42k+/mo) removes the warning; $0.015/post, $0.005/read; refresh tokens last ~6 months | No official source found | Price figure removed; the rest moved to "Not confirmed" |
 | Slack (run with search) | Since May 2025, apps not in the Marketplace get 1 request/min on `conversations.history`; Marketplace review takes up to 10 weeks and needs 10 active workspace installs; PKCE supported | Matches [Slack's changelog](https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps) and the fact sheet | Confirmed |
 | HubSpot (fact sheet) | n/a | Apps on developer platform 2025.2 are capped at 25 installs until the Marketplace listing is approved ([HubSpot changelog](https://developers.hubspot.com/changelog/new-marketplace-distribution-app-install-limits)) | Spot-checked; guide not generated yet |
 
-**Live-generated guide check.** I generated a guide live for X (Twitter), a toolkit where Composio has no managed OAuth app, and reviewed it against X's developer documentation myself. Its guidance was correct.
+**Live-generated guide check.** I generated the X (Twitter) guide live on production, for a toolkit where Composio has no managed OAuth app, and reviewed it against X's developer documentation myself. Its core guidance was correct; the source check above only removed figures that had no source.
 
 **What I learned.** Without web search, the agent read the right docs but got recent changes wrong: GitHub PKCE, and organization access restrictions. With search, it found changelogs and policy updates (Slack's 2025 rate limit). Most errors are recent policy changes the model doesn't know about. So the research date is shown on every guide and "Re-run research" is one click.
 
@@ -189,7 +191,7 @@ Or from the command line: `npx vercel link && npx vercel env add GEMINI_API_KEY 
 
 - **Gemini's free tier is the bottleneck.** It allows about 20 requests per model per day, and one guide uses about 10–15. The agent fails over across models, but a paid key is needed for a dependable live demo and for generating the library in bulk.
 - **Connect Vercel Blob for durable live guides.** Without `BLOB_READ_WRITE_TOKEN`, guides generated on Vercel go to `/tmp` and are lost when the instance recycles.
-- **Two reviewed guides so far: Gmail (Hard) and GitHub (Easy).** Next: Slack (Moderate), a gated or bring-your-own toolkit (LinkedIn, Shopify or X), HubSpot and Salesforce, each reviewed against `data/reference-facts.md`.
+- **Three reviewed guides so far:** GitHub (Easy), X (Moderate, bring your own) and Gmail (Hard). Next: Slack, LinkedIn (gated), HubSpot and Salesforce, each reviewed against `data/reference-facts.md`.
 - **Probes confirm endpoints, not approval.** Many consoles and authorize pages render in the browser or require a login, so error text often can't be read.
 - **Review is manual.** Next step: a second checker agent that re-verifies each *Documented* claim against its cited URL before a guide is published.
 - **Composio integration ideas:**

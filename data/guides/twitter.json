@@ -1,0 +1,275 @@
+{
+  "slug": "twitter",
+  "appName": "X (formerly Twitter)",
+  "website": "https://x.com",
+  "category": "Social Media",
+  "summary": "X uses OAuth 2.0 with mandatory PKCE. Recent 2026 changes shifted the platform to a pay-per-use model with no free tier for new developers, though authentication remains self-serve and doesn't require a manual review queue for standard production use.",
+  "verdict": {
+    "difficulty": "moderate",
+    "why": "Setup is self-serve with no app review, but X has no free tier: API access is pay-per-use with a card on file, and apps requesting DM or write scopes show users a 'sensitive permissions' warning that self-serve apps cannot remove.",
+    "setupTime": "45 minutes",
+    "approvalWait": "None",
+    "approval": "none",
+    "approvalTrigger": "No review for self-serve pay-per-use apps. Enterprise access is a separate sales process.",
+    "cost": "Pay-per-use, card required (no free tier). Per-request prices vary by source; check the Developer Portal."
+  },
+  "oauth": {
+    "developerConsoleUrl": "https://developer.x.com/en/portal/dashboard",
+    "docsUrl": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code",
+    "authorizeUrl": "https://x.com/i/oauth2/authorize",
+    "tokenUrl": "https://api.x.com/2/oauth2/token",
+    "pkce": "required",
+    "refreshTokens": "Requires the offline.access scope; access tokens last 2 hours. Store the newest refresh token after every refresh.",
+    "redirectUriRules": "Exact match required; case-sensitive; HTTPS required for production; http://localhost allowed.",
+    "scopeNotes": "DM and write scopes (dm.read, tweet.write, ...) trigger a 'sensitive permissions' warning on the consent screen for pay-per-use apps (since 14 Sep 2026)."
+  },
+  "prerequisites": [
+    {
+      "item": "Verified X Account",
+      "detail": "Account must have a verified phone number and email address.",
+      "blocking": true
+    },
+    {
+      "item": "Payment Method",
+      "detail": "Pay-per-use billing requires a valid credit card on file for API credits.",
+      "blocking": true
+    }
+  ],
+  "steps": [
+    {
+      "title": "Create Developer Account",
+      "detail": "Log in to the Developer Portal with your verified X account and apply for the Pay-Per-Use plan.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "10m",
+      "url": "https://developer.x.com/en/portal/dashboard"
+    },
+    {
+      "title": "Configure User Authentication",
+      "detail": "In App Settings, enable 'User authentication'. Set App Type to 'Web App' and add https://backend.composio.dev/api/v1/auth-apps/add to the Callback URIs.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "10m",
+      "url": ""
+    },
+    {
+      "title": "Obtain Credentials",
+      "detail": "Copy the Client ID and Client Secret from the 'Keys and Tokens' tab into your Composio configuration.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "2m",
+      "url": ""
+    },
+    {
+      "title": "Implement PKCE Flow",
+      "detail": "Generate code_verifier and code_challenge (S256). Exchange auth_code for tokens within 30 seconds of receipt.",
+      "actor": "agent",
+      "phase": "build",
+      "estimate": "15m",
+      "url": ""
+    },
+    {
+      "title": "Add offline.access Scope",
+      "detail": "Include 'offline.access' in the scope list to ensure the agent can refresh the 2-hour access tokens.",
+      "actor": "agent",
+      "phase": "build",
+      "estimate": "1m",
+      "url": ""
+    }
+  ],
+  "blockers": [
+    {
+      "blocker": "Authorization Code Expiry",
+      "likelihood": "medium",
+      "howToUnblock": "The code expires in 30 seconds. Ensure your backend handles the exchange immediately upon redirect."
+    },
+    {
+      "blocker": "'Sensitive permissions' warning on the consent screen",
+      "likelihood": "high",
+      "howToUnblock": "It cannot be removed for self-serve pay-per-use apps. Request only the scopes you need (Composio's defaults include dm.read, dm.write and tweet.write), explain the warning in your connect flow, or talk to X sales about Enterprise access."
+    }
+  ],
+  "gotchas": [
+    "Refresh tokens are single-use; the agent must store the new refresh token returned with every refresh request.",
+    "Redirect URIs are character-sensitive; even a trailing slash mismatch will cause a 400 error.",
+    "The Free tier is discontinued; all API calls now incur metered costs."
+  ],
+  "handoff": {
+    "agentCanDo": [
+      "Generate PKCE challenge and verifier",
+      "Handle immediate 30-second token exchange",
+      "Manage single-use refresh token rotation",
+      "Estimate costs based on predicted read/write volume"
+    ],
+    "youMustDo": [
+      "Verify account phone/email",
+      "Provide payment details for pay-per-use billing",
+      "Manually copy-paste Callback URIs into the portal"
+    ]
+  },
+  "claims": [
+    {
+      "claim": "OAuth 2.0 with PKCE is mandatory for user-context access.",
+      "evidence": "tested",
+      "note": "",
+      "sourceUrl": "https://api.x.com/.well-known/oauth-authorization-server"
+    },
+    {
+      "claim": "The authorization code must be exchanged within 30 seconds.",
+      "evidence": "documented",
+      "note": "",
+      "sourceUrl": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code"
+    },
+    {
+      "claim": "Refresh tokens are single-use and rotate on every use.",
+      "evidence": "inferred",
+      "note": "Review: the cited page (X Ads API MCP docs) is not the OAuth reference; not confirmed in the OAuth 2.0 docs.",
+      "sourceUrl": "https://docs.x.com/x-ads-api/mcp"
+    },
+    {
+      "claim": "Access tokens expire after 2 hours.",
+      "evidence": "documented",
+      "note": "",
+      "sourceUrl": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code"
+    },
+    {
+      "claim": "A Free API tier is no longer available for new developers in 2026.",
+      "evidence": "community",
+      "note": "",
+      "sourceUrl": "https://postproxy.dev/blog/x-api-pricing-2026"
+    },
+    {
+      "claim": "Pay-per-use apps requesting DM or write scopes show a 'sensitive permissions' warning on the consent screen (since 14 Sep 2026); it cannot be removed for self-serve apps.",
+      "evidence": "community",
+      "note": "Announced by X on its developer forum.",
+      "sourceUrl": "https://devcommunity.x.com/t/oauth-consent-screen-update-for-apps-requesting-sensitive-scopes/275844"
+    },
+    {
+      "claim": "The authorization code is valid for 30 seconds, and access tokens for 2 hours; offline.access is required for a refresh token.",
+      "evidence": "documented",
+      "note": "Checked in review against X's OAuth 2.0 docs.",
+      "sourceUrl": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code"
+    }
+  ],
+  "openQuestions": [
+    "The exact monthly cap for pay-per-use reads (sources vary between 2M and 3M).",
+    "Exact pay-per-use prices per post and per read (only third-party sources found).",
+    "Refresh-token lifetime (not stated in X's OAuth 2.0 docs).",
+    "Whether any path short of Enterprise removes the sensitive-permissions warning."
+  ],
+  "composioAdvice": "Composio has no managed X app, so you must create your own in the X Developer Portal (pay-per-use, card required) and add Composio's redirect URI. Composio's default X scopes include dm.read, dm.write and tweet.write, which make X show your users a 'sensitive permissions' warning; trim the scopes to what your agent actually uses. Keep offline.access, or connections drop after 2 hours.",
+  "sources": [
+    {
+      "title": "OAuth 2.0 Authorization Code Flow with PKCE - X",
+      "url": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code"
+    },
+    {
+      "title": "X API Pricing in 2026",
+      "url": "https://postproxy.dev/blog/x-api-pricing-2026"
+    },
+    {
+      "title": "OAuth consent screen update for sensitive scopes",
+      "url": "https://devcommunity.x.com/t/oauth-consent-screen-update-for-apps-requesting-sensitive-scopes/275844"
+    }
+  ],
+  "probes": [
+    {
+      "kind": "Token endpoint (invalid code)",
+      "target": "https://api.x.com/2/oauth2/token",
+      "ok": true,
+      "finding": "HTTP 400; application/json;charset=UTF-8; body: {\"error\":\"invalid_request\",\"error_description\":\"Missing required parameter [code_verifier].\"}",
+      "at": "2026-11-05T11:39:55.593Z"
+    },
+    {
+      "kind": "OAuth discovery document",
+      "target": "https://api.x.com/.well-known/oauth-authorization-server",
+      "ok": true,
+      "finding": "Found. authorize=https://x.com/i/oauth2/authorize, token=https://api.x.com/2/oauth2/token, PKCE methods=[\"S256\"]",
+      "at": "2026-11-05T11:39:55.634Z"
+    },
+    {
+      "kind": "Authorize endpoint (fake client_id)",
+      "target": "https://x.com/i/oauth2/authorize",
+      "ok": true,
+      "finding": "HTTP 200; page \u201cAuthorize app / X\u201d; says: \u201ccom%2Fi%2Foauth2%2Fauthorize%3Fstate%3Dprobe%26client_id%3Doauth-guide-probe-invalid-client%26response_type%3Dcode%26scope%3Dtweet\u201d",
+      "at": "2026-11-05T11:39:55.654Z"
+    },
+    {
+      "kind": "OAuth discovery document",
+      "target": "https://x.com",
+      "ok": false,
+      "finding": "No .well-known/openid-configuration or oauth-authorization-server document found (common for non-OIDC providers; not a problem by itself).",
+      "at": "2026-11-05T11:39:55.705Z"
+    },
+    {
+      "kind": "Developer Portal console",
+      "target": "https://developer.x.com/en/portal/dashboard",
+      "ok": true,
+      "finding": "HTTP 200 after 3 redirect(s); landed on x.com/login (login wall: an account is needed) \u2014 \u201cX - The Everything App / X\u201d",
+      "at": "2026-11-05T11:39:55.798Z"
+    },
+    {
+      "kind": "X API Documentation main page",
+      "target": "https://docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code",
+      "ok": true,
+      "finding": "HTTP 200; landed on docs.x.com/fundamentals/authentication/oauth-2-0/authorization-code \u2014 \u201cOAuth 2.0 Authorization Code Flow with PKCE - X\u201d",
+      "at": "2026-11-05T11:40:03.986Z"
+    }
+  ],
+  "composio": {
+    "slug": "twitter",
+    "name": "Twitter",
+    "logo": "https://logos.composio.dev/api/twitter",
+    "managedOAuth": false,
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "defaultScopes": [
+      "dm.write",
+      "dm.read",
+      "mute.read",
+      "mute.write",
+      "space.read",
+      "tweet.write",
+      "tweet.read",
+      "tweet.moderate.write",
+      "users.read",
+      "follows.read",
+      "follows.write",
+      "like.read",
+      "like.write",
+      "list.read",
+      "list.write",
+      "block.read",
+      "block.write",
+      "bookmark.read",
+      "bookmark.write",
+      "media.write",
+      "offline.access"
+    ],
+    "authorizeUrl": "https://x.com/i/oauth2/authorize",
+    "tokenUrl": "https://api.x.com/2/oauth2/token",
+    "toolsCount": 84,
+    "triggersCount": 0
+  },
+  "meta": {
+    "input": "twitter",
+    "generatedAt": "2026-11-05T11:40:58.302Z",
+    "model": "gemini-3-flash-preview",
+    "durationSec": 77,
+    "toolCalls": 17,
+    "review": {
+      "status": "reviewed",
+      "reviewedAt": "2026-11-05",
+      "notes": [
+        "Generated live on the production site (gemini-3-flash-preview after model failover, 17 tool calls, 77 s). The author also reviewed it against X's developer docs.",
+        "Confirmed by probe: PKCE is mandatory (the token endpoint rejects requests without code_verifier) and the discovery document at api.x.com advertises S256.",
+        "Confirmed against X's docs: 30-second authorization codes, 2-hour access tokens, offline.access required for refresh tokens.",
+        "Confirmed on X's developer forum: the Free tier is gone (pay-per-use only), and DM/write scopes show a sensitive-permissions warning since 14 Sep 2026.",
+        "Removed: an unsourced '$42k+/month Enterprise' figure.",
+        "Downgraded: specific per-request prices (third-party blog only) and a ~6-month refresh-token lifetime (not in X's docs) are now listed as not confirmed."
+      ]
+    }
+  }
+}
