@@ -4,8 +4,9 @@ For any Composio toolkit, it answers two questions. Can I ship on Composio's man
 
 The library lists Composio's 100 most popular OAuth toolkits. For any other app (a name or a website), an agent researches the provider live, checks its real OAuth endpoints, and writes a guide you can share.
 
-- **Live app:** `<add Vercel URL>`
-- **Source:** `<add GitHub URL>`
+- **Live app:** https://oauth-app-atlas.vercel.app
+- **Source:** https://github.com/Aryanshettar007/oauth-app-atlas
+- **Author:** Aryan Shettar (aryanshettar007@gmail.com, [aryanshettar.tech](https://aryanshettar.tech)). Short Technical Assessment, Product Intern, Composio
 
 ---
 
@@ -61,7 +62,8 @@ What lifts those restrictions is a review, verification, Google's CASA security 
 
    That confirms the endpoints exist and shows how the provider rejects unknown apps. It never registers apps, signs in or obtains tokens, so it is safe to run on any provider, unattended.
 6. **Split the agent into two phases.** The research loop uses tool calls. A separate structured-output call then turns the research log into a guide that is validated against the schema (one retry if it fails). This keeps the guide format stable while the research stays open-ended.
-7. **Use Composio's tools where they fit.** Web search goes through Composio's `composio_search` toolkit first (`COMPOSIO_SEARCH_TAVILY`, version pinned as Composio's docs recommend), then falls back to Tavily directly.
+7. **Build it as a Composio feature, not a generic directory.** Using Composio's toolkit API as the base makes this a useful application for Composio itself. It answers the exact question a developer has when they open **Create Auth Config** for a toolkit, with Composio's own redirect URI, default scopes and SDK snippet in the guide. I approached this as a product manager first: who hits this problem (a developer moving from prototype to production), what decision they're making (managed app or own app), what they fear (an unplanned multi-week review), and where the answer should appear (in the dashboard flow, in docs, and as JSON for coding agents).
+8. **Search provider: pick what's free and built for agents.** Gemini's Google Search grounding needs a paid tier, and the Brave Search API needs a card on file, so I couldn't use either. I looked for free web-search APIs and chose **Tavily**: a free tier, results built for LLM agents, and an official SDK (`@tavily/core`). The agent first tries **Composio's own `composio_search` toolkit** (`COMPOSIO_SEARCH_TAVILY`, version pinned as Composio's docs recommend), which itself exposes Tavily. That needs a Composio key with the `tool_execution` permission; without it, the agent calls Tavily directly.
 
 ## 4. How it works
 
@@ -120,6 +122,8 @@ Stored: curated guides in data/guides/*.json (in the repo);
 | Slack (run with search) | Since May 2025, apps not in the Marketplace get 1 request/min on `conversations.history`; Marketplace review takes up to 10 weeks and needs 10 active workspace installs; PKCE supported | Matches [Slack's changelog](https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps) and the fact sheet | Confirmed |
 | HubSpot (fact sheet) | n/a | Apps on developer platform 2025.2 are capped at 25 installs until the Marketplace listing is approved ([HubSpot changelog](https://developers.hubspot.com/changelog/new-marketplace-distribution-app-install-limits)) | Spot-checked; guide not generated yet |
 
+**Live-generated guide check.** I generated a guide live for X (Twitter), a toolkit where Composio has no managed OAuth app, and reviewed it against X's developer documentation myself. Its guidance was correct.
+
 **What I learned.** Without web search, the agent read the right docs but got recent changes wrong: GitHub PKCE, and organization access restrictions. With search, it found changelogs and policy updates (Slack's 2025 rate limit). Most errors are recent policy changes the model doesn't know about. So the research date is shown on every guide and "Re-run research" is one click.
 
 **Not verified:**
@@ -161,9 +165,26 @@ npm run index-guides                   # register curated guides with the app
 
 Or from the command line: `npx vercel link && npx vercel env add GEMINI_API_KEY && npx vercel --prod`.
 
-## 8. Limitations and next steps
+## 8. Product thinking beyond the build
+
+- **User and moment:** a developer moving a Composio integration from prototype to production, usually when a customer asks for their brand on the consent screen, or when shared quota or a missing managed app blocks them.
+- **Job to be done:** decide between staying on the managed app and bringing their own, then get their own approved without a surprise.
+- **Success metrics for Composio:**
+  - time from "Create Auth Config" to a working production auth config
+  - fewer support tickets about "unverified app", rate-limit and review problems
+  - fewer customers stuck on the managed app past the point where they should have moved
+- **Where it ships:**
+  - inline in the dashboard when a toolkit has no managed app
+  - a linked guide from each toolkit's docs page
+  - a JSON endpoint that coding agents (Claude Code, Cursor) can read while they wire up the integration
+- **Deliberately not built:**
+  - automatic app registration with providers, which needs the developer's identity and legal acceptance
+  - user accounts
+
+## 9. Limitations and next steps
 
 - **Gemini's free tier is the bottleneck.** It allows about 20 requests per model per day, and one guide uses about 10–15. The agent fails over across models, but a paid key is needed for a dependable live demo and for generating the library in bulk.
+- **Connect Vercel Blob for durable live guides.** Without `BLOB_READ_WRITE_TOKEN`, guides generated on Vercel go to `/tmp` and are lost when the instance recycles.
 - **Only Gmail is in the curated library so far.** The other seed runs hit the quota. Next: Slack, HubSpot, Salesforce, LinkedIn, and one bring-your-own toolkit (Shopify or X), each reviewed against `data/reference-facts.md`.
 - **Probes confirm endpoints, not approval.** Many consoles and authorize pages render in the browser or require a login, so error text often can't be read.
 - **Review is manual.** Next step: a second checker agent that re-verifies each *Documented* claim against its cited URL before a guide is published.
