@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { Logo } from "@/components/Logo";
 
 const geist = Geist({ variable: "--font-geist", subsets: ["latin"] });
 const mono = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"], weight: ["400", "500"] });
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="sticky top-0 z-40 px-3 pt-3">
           <header className="mx-auto max-w-6xl card px-3 sm:px-4 h-12 flex items-center justify-between gap-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
             <Link href="/" className="font-semibold tracking-tight flex items-center gap-2 text-[15px]">
-              <span aria-hidden className="grid place-items-center w-6 h-6 rounded-md font-mono text-[11px] font-semibold text-[#0b0f14]" style={{ background: "var(--grad)" }}>OA</span>
+              <Logo size={24} />
               OAuth App Atlas
               <span className="tag-grad hidden sm:inline-block"><span>for Composio</span></span>
             </Link>
