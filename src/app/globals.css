@@ -1,26 +1,89 @@
 @import "tailwindcss";
 
+/* Design language follows Composio: a dark charcoal surface, Geist + JetBrains Mono, and a mint-to-blue
+   gradient (as on their PLATFORM badge) reserved for brand moments: primary action, tags, managed chips. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #141414;
+  --surface: #1c1c1c;
+  --ink: #f4f4f5;
+  --muted: #a1a1aa;
+  --line: #2c2c2c;
+  --accent: #5aa9f0;
+  --accent-soft: #15243a;
+  --grad-from: #5ee39a;
+  --grad-mid: #4fb8c4;
+  --grad-to: #3b82f6;
+  --grad: linear-gradient(90deg, var(--grad-from), var(--grad-mid), var(--grad-to));
+  --highlight: #5ee39a;
+  --highlight-ink: #0f0f0f;
+  --hero: #1c1c1c;
+  --hero-ink: #f4f4f5;
+  --hero-line: #2c2c2c;
+  --easy: #5ee39a;
+  --easy-soft: #11281c;
+  --moderate: #f5c451;
+  --moderate-soft: #2a2410;
+  --hard: #fb923c;
+  --hard-soft: #2e1a10;
+  --gated: #c4a1ff;
+  --gated-soft: #231a36;
+  --code-bg: #242424;
+  color-scheme: dark;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-highlight: var(--highlight);
+  --color-code: var(--code-bg);
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, Menlo, monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
 }
+h1, h2, h3 { text-wrap: balance; letter-spacing: -0.02em; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.eyebrow {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500;
+}
+.tag {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  display: inline-block; border: 1px solid currentColor; border-radius: 4px; padding: 2px 6px;
+  font-size: 10px; line-height: 1; letter-spacing: 0.06em; text-transform: uppercase;
+}
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.btn-primary {
+  background: var(--grad); color: #0b0f14; font-weight: 600; border-radius: 10px;
+  transition: filter .15s ease;
+}
+.btn-primary:hover { filter: brightness(1.08); }
+/* Gradient outline + gradient mono text, as on Composio's PLATFORM badge. */
+.tag-grad {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  display: inline-block; padding: 3px 8px; border-radius: 6px; border: 1.5px solid transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--grad) border-box;
+  font-size: 10px; line-height: 1; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 500;
+}
+.tag-grad > span, .grad-text {
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.btn-secondary { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.btn-secondary:hover { border-color: var(--ink); }
+.tnum { font-variant-numeric: tabular-nums; }
+.dots {
+  background-image: radial-gradient(color-mix(in srgb, var(--hero-ink) 14%, transparent) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+@keyframes pulse-dot { 0%,100% { opacity: .35 } 50% { opacity: 1 } }
+.pulse { animation: pulse-dot 1.2s ease-in-out infinite; }

@@ -1,0 +1,45 @@
+# gmail — 2026-11-05T10:42:40.448Z
+status: Matched Composio toolkit “Gmail” · Composio-managed OAuth available
+status: Researching “Gmail”
+→ Searching (composio_search): google oauth gmail api restricted scopes security assessment CASA
+→ Searching (composio_search): google cloud console oauth app registration process for gmail
+→ Searching (composio_search): google oauth redirect uri rules localhost https
+→ Looking for OAuth discovery at https://accounts.google.com
+  ◆ probe: OAuth discovery document https://accounts.google.com/.well-known/openid-configuration — Found. authorize=https://accounts.google.com/o/oauth2/v2/auth, token=https://oauth2.googleapis.com/token, PKCE methods=["plain","S256"]
+  ✓ Discovery document found
+  ✓ 8 sources
+  ✓ 8 sources
+  ✓ 8 sources
+→ Probing authorize endpoint https://accounts.google.com/o/oauth2/v2/auth
+→ Probing token endpoint https://oauth2.googleapis.com/token
+→ Checking https://appdefensealliance.dev/casa/tier-2/ast-overview
+  ◆ probe: Token endpoint (invalid code) https://oauth2.googleapis.com/token — HTTP 401; application/json; charset=utf-8; body: { "error": "invalid_client", "error_description": "The OAuth client was not found." }
+  ✓ HTTP 401
+  ◆ probe: CASA Security Assessment Details https://appdefensealliance.dev/casa/tier-2/ast-overview — HTTP 404; landed on appdefensealliance.dev/casa/tier-2/ast-overview — “404 &nbsp;|&nbsp; Страница није пронађена &nbsp;|&nbsp; App Defense Alliance”
+  ✓ HTTP 404
+  ◆ probe: Authorize endpoint (fake client_id) https://accounts.google.com/o/oauth2/v2/auth — HTTP 200; redirects: 302 → accounts.google.com/signin/oauth/error | 302 → accounts.google.com/signin/oauth/error; page “Sign in - Google Accounts”; says: “'> --> Error 400 (Bad Request)!!1 400 / That’s an error”; asks for login before validating client_id
+  ✓ HTTP 200
+→ Searching (tavily): Google Gmail API CASA Tier 2 restricted scopes list 2026
+→ Searching (tavily): Google OAuth testing mode user limit and expiration 2026
+→ Searching (tavily): Google OAuth Authorized Domains requirement for redirect URIs
+  ✓ 8 sources
+  ✓ 8 sources
+  ✓ 8 sources
+status: Writing the guide from what was found
+note: ### **Gmail OAuth Integration Research Notes**
+
+#### **Developer Portal & App Registration**
+*   **Console URL:** [Google Cloud Console](https://console.cloud.google.com/) (APIs & Services > Credentials).
+*   **Account Type:** Standard Google Account or Google Workspace account.
+*   **Cost:** API usage is generally free within generous quotas. However, **Security Assessments (CASA)** required for Gmail restricted scopes cost between **$540 and $1,000** for the automated self-serve track in 2026 (source: Unipile, CellCog).
+*   **Setup:** You must enable the **Gmail API** in the Library before configuring the OAuth consent screen.
+
+#### **OAuth Technical Specs**
+*   **Endpoints:**
+    *   **Authorize:** `https://accounts.google.com/o/oauth2/v2/auth` (probe)
+    *   **Token:** `https://oauth2.googleapis.com/token` (probe)
+*   **Discovery:** [https://accounts.google.com/.well-known/openid-configuration](https://accounts.google.com/.well-known/openid-configuration) (probe)
+*   **PKCE:** Supported (`S256`).
+*   **Redirect URI Rules:**
+    *   **HTTPS Required:** Mandatory for all production URIs. `http://localhost` or `http://127.0.0.1` are the only exceptions.
+    *   **Exact Match:** N

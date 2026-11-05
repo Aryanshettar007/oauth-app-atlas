@@ -1,0 +1,266 @@
+{
+  "slug": "gmail",
+  "appName": "Gmail",
+  "website": "https://mail.google.com/",
+  "category": "Email",
+  "summary": "Google's email service provides extensive API access via OAuth2, but apps requesting broad access to mail data (restricted scopes) must undergo rigorous security audits and paid assessments.",
+  "verdict": {
+    "difficulty": "hard",
+    "why": "Requests for full Gmail access (restricted scopes) trigger a mandatory CASA Tier 2 security assessment, which costs up to $1,000 and requires several weeks of review.",
+    "setupTime": "1 hour",
+    "approvalWait": "4-6 weeks",
+    "approval": "always",
+    "approvalTrigger": "Requesting restricted scopes (like mail.google.com) for an 'External' app status.",
+    "cost": "$540 - $1,000"
+  },
+  "oauth": {
+    "developerConsoleUrl": "https://console.cloud.google.com/apis/credentials",
+    "docsUrl": "https://developers.google.com/gmail/api/auth/about-oauth",
+    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "pkce": "supported",
+    "refreshTokens": "Requires access_type=offline; tokens expire in 7 days while in Testing mode.",
+    "redirectUriRules": "HTTPS mandatory for production; localhost allowed for dev; exact matching required; domain must be in 'Authorized Domains' list.",
+    "scopeNotes": "Default Composio scopes include 'mail.google.com', which is a Restricted scope requiring CASA Tier 2 assessment."
+  },
+  "prerequisites": [
+    {
+      "item": "Google Cloud Project",
+      "detail": "A project must be created in the Google Cloud Console.",
+      "blocking": true
+    },
+    {
+      "item": "Gmail API Enabled",
+      "detail": "Must manually enable the 'Gmail API' in the API Library.",
+      "blocking": true
+    },
+    {
+      "item": "Privacy Policy",
+      "detail": "Must include a 'Limited Use' disclosure statement specifically for Google API data.",
+      "blocking": true
+    }
+  ],
+  "steps": [
+    {
+      "title": "Enable Gmail API",
+      "detail": "Navigate to API Library in Google Cloud Console and enable 'Gmail API' for your project.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "5m",
+      "url": "https://console.cloud.google.com/apis/library/gmail.googleapis.com"
+    },
+    {
+      "title": "Configure Consent Screen",
+      "detail": "Set up the OAuth consent screen with app name, support email, and developer contact info.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "15m",
+      "url": ""
+    },
+    {
+      "title": "Add Scopes and Test Users",
+      "detail": "Add the required Gmail scopes. While in 'Testing' mode, you must manually add up to 100 test user emails to allow them to connect.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "10m",
+      "url": ""
+    },
+    {
+      "title": "Generate Credentials",
+      "detail": "Create an OAuth 2.0 Client ID for a 'Web application' and set the redirect URI.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "5m",
+      "url": ""
+    },
+    {
+      "title": "Develop Integration",
+      "detail": "Implement OAuth flow using client ID and secret, ensuring access_type=offline is used.",
+      "actor": "agent",
+      "phase": "build",
+      "estimate": "2h",
+      "url": ""
+    },
+    {
+      "title": "Draft Verification Materials",
+      "detail": "Prepare the YouTube demo video showing the full OAuth flow and how the data is used in the app.",
+      "actor": "agent",
+      "phase": "review",
+      "estimate": "1h",
+      "url": ""
+    },
+    {
+      "title": "Submit for App Verification",
+      "detail": "Submit the app for Google's standard verification (Standard Review).",
+      "actor": "you",
+      "phase": "review",
+      "estimate": "15m",
+      "url": ""
+    },
+    {
+      "title": "Initiate CASA Assessment",
+      "detail": "Engage an authorized lab for the CASA Tier 2 assessment and pay the required fee.",
+      "actor": "you",
+      "phase": "review",
+      "estimate": "4-6 weeks",
+      "url": ""
+    }
+  ],
+  "blockers": [
+    {
+      "blocker": "7-Day Refresh Token Expiry",
+      "likelihood": "high",
+      "howToUnblock": "Move app from 'Testing' to 'Production' status via verification to get long-lived tokens."
+    },
+    {
+      "blocker": "CASA Cost & Complexity",
+      "likelihood": "high",
+      "howToUnblock": "If you only need to send mail, request gmail.send (a sensitive scope: standard verification, no CASA) instead of mail.google.com. Reading mail needs a restricted scope (gmail.readonly, gmail.metadata, gmail.modify or mail.google.com), so plan for CASA in that case."
+    }
+  ],
+  "gotchas": [
+    "Tokens expire after 7 days if the app status is set to Testing.",
+    "The 100-user limit in Testing mode is hard; new users cannot join once reached.",
+    "Authorized Domains list on the consent screen must include the redirect URI's domain.",
+    "Prompt=consent is recommended to ensure refresh tokens are always returned."
+  ],
+  "handoff": {
+    "agentCanDo": [
+      "Generate OAuth integration code for Web or CLI flows.",
+      "Draft the required Privacy Policy with 'Limited Use' clauses.",
+      "Outline the script for the YouTube verification demo video.",
+      "Research the minimum sufficient scopes for specific agent tasks."
+    ],
+    "youMustDo": [
+      "Create and own the Google Cloud Project.",
+      "Record the YouTube demo video and upload it.",
+      "Pay the CASA assessment fees if restricted scopes are used.",
+      "Submit the final verification request in the Google Console."
+    ]
+  },
+  "claims": [
+    {
+      "claim": "CASA Tier 2 costs between $540 and $1,000 for automated self-serve track in 2026.",
+      "evidence": "community",
+      "note": "",
+      "sourceUrl": "https://www.unipile.com/integrating-google-oauth-2-0-user-authentication-into-your-app"
+    },
+    {
+      "claim": "Refresh tokens in 'Testing' mode expire after 7 days.",
+      "evidence": "documented",
+      "note": "",
+      "sourceUrl": "https://developers.google.com/identity/protocols/oauth2"
+    },
+    {
+      "claim": "OAuth discovery document is available and lists PKCE S256 support.",
+      "evidence": "tested",
+      "note": "",
+      "sourceUrl": "https://accounts.google.com/.well-known/openid-configuration"
+    },
+    {
+      "claim": "The mail.google.com scope is classified as a Restricted scope.",
+      "evidence": "documented",
+      "note": "",
+      "sourceUrl": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification"
+    },
+    {
+      "claim": "Standard verification takes 3-7 business days, while CASA takes 4-6 weeks.",
+      "evidence": "community",
+      "note": "",
+      "sourceUrl": "https://buzzclan.com/cyber-security/google-casa-tier-2-assessment"
+    }
+  ],
+  "openQuestions": [
+    "Whether individual developers can qualify for even lower CASA fees than the $540 tier.",
+    "If the 100-user limit is enforced before or after the CASA assessment is required for External apps."
+  ],
+  "composioAdvice": "Composio provides a managed OAuth app for Gmail, allowing you to bypass registration and verification during development. However, because Composio's default scopes include 'mail.google.com' (Restricted), you will eventually need your own app and a CASA assessment to scale. To delay this, if your agent only needs to send mail, use a custom OAuth app limited to 'gmail.send', which needs only standard verification. Any scope that reads mail (including 'gmail.readonly') is restricted and still requires CASA.",
+  "sources": [
+    {
+      "title": "Google OAuth Verification & Gmail API (2026)",
+      "url": "https://www.unipile.com/integrating-google-oauth-2-0-user-authentication-into-your-app"
+    },
+    {
+      "title": "Google Developers: Restricted Scope Verification",
+      "url": "https://developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification"
+    },
+    {
+      "title": "Google Cloud CASA Tier 2 Assessment",
+      "url": "https://buzzclan.com/cyber-security/google-casa-tier-2-assessment"
+    }
+  ],
+  "probes": [
+    {
+      "kind": "OAuth discovery document",
+      "target": "https://accounts.google.com/.well-known/openid-configuration",
+      "ok": true,
+      "finding": "Found. authorize=https://accounts.google.com/o/oauth2/v2/auth, token=https://oauth2.googleapis.com/token, PKCE methods=[\"plain\",\"S256\"]",
+      "at": "2026-11-05T10:42:53.523Z"
+    },
+    {
+      "kind": "Token endpoint (invalid code)",
+      "target": "https://oauth2.googleapis.com/token",
+      "ok": true,
+      "finding": "HTTP 401; application/json; charset=utf-8; body: { \"error\": \"invalid_client\", \"error_description\": \"The OAuth client was not found.\" }",
+      "at": "2026-11-05T10:43:13.443Z"
+    },
+    {
+      "kind": "CASA Security Assessment Details",
+      "target": "https://appdefensealliance.dev/casa/tier-2/ast-overview",
+      "ok": false,
+      "finding": "HTTP 404; landed on appdefensealliance.dev/casa/tier-2/ast-overview \u2014 \u201c404 &nbsp;|&nbsp; \u0421\u0442\u0440\u0430\u043d\u0438\u0446\u0430 \u043d\u0438\u0458\u0435 \u043f\u0440\u043e\u043d\u0430\u0452\u0435\u043d\u0430 &nbsp;|&nbsp; App Defense Alliance\u201d",
+      "at": "2026-11-05T10:43:13.805Z"
+    },
+    {
+      "kind": "Authorize endpoint (fake client_id)",
+      "target": "https://accounts.google.com/o/oauth2/v2/auth",
+      "ok": true,
+      "finding": "HTTP 200; redirects: 302 \u2192 accounts.google.com/signin/oauth/error | 302 \u2192 accounts.google.com/signin/oauth/error; page \u201cSign in - Google Accounts\u201d; says: \u201c'> --> Error 400 (Bad Request)!!1 400 / That\u2019s an error\u201d; asks for login before validating client_id",
+      "at": "2026-11-05T10:43:14.282Z"
+    }
+  ],
+  "composio": {
+    "slug": "gmail",
+    "name": "Gmail",
+    "logo": "https://logos.composio.dev/api/gmail",
+    "managedOAuth": true,
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "defaultScopes": [
+      "https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/contacts.readonly",
+      "https://www.googleapis.com/auth/contacts.other.readonly",
+      "https://www.googleapis.com/auth/profile.language.read",
+      "https://www.googleapis.com/auth/user.addresses.read",
+      "https://www.googleapis.com/auth/user.birthday.read",
+      "https://www.googleapis.com/auth/user.emails.read",
+      "https://www.googleapis.com/auth/user.phonenumbers.read",
+      "https://www.googleapis.com/auth/profile.emails.read",
+      "https://mail.google.com/"
+    ],
+    "authorizeUrl": "https://accounts.google.com/o/oauth2/v2/auth",
+    "tokenUrl": "https://oauth2.googleapis.com/token",
+    "toolsCount": 61,
+    "triggersCount": 2
+  },
+  "meta": {
+    "input": "gmail",
+    "generatedAt": "2026-11-05T10:44:13.060Z",
+    "model": "gemini-3.6-flash",
+    "durationSec": 93,
+    "toolCalls": 10,
+    "review": {
+      "status": "reviewed",
+      "reviewedAt": "2026-11-05",
+      "notes": [
+        "Corrected: the agent suggested gmail.readonly might avoid the CASA assessment. Google lists gmail.readonly as a restricted scope (developers.google.com/identity/protocols/oauth2/production-readiness/restricted-scope-verification); only send-only access (gmail.send) avoids CASA. Fixed in the blocker and in the Composio advice.",
+        "Confirmed against Google's docs: mail.google.com is restricted and triggers restricted-scope verification plus CASA; refresh tokens for apps in Testing status expire after 7 days.",
+        "Confirmed by probe: Google's discovery document advertises PKCE S256, and the authorize endpoint rejects an unknown client with 'Error 401: invalid_client'.",
+        "Not confirmed: the CASA price range ($540 to $1,000) comes from community and assessor sources; Google does not publish a fee."
+      ]
+    }
+  }
+}
