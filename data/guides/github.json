@@ -1,0 +1,257 @@
+{
+  "slug": "github",
+  "appName": "GitHub",
+  "website": "https://github.com",
+  "category": "Developer Tools",
+  "summary": "GitHub OAuth allows applications to act on behalf of GitHub users. Registration is self-serve, instant, and completely free with no mandatory review or verification process.",
+  "verdict": {
+    "difficulty": "easy",
+    "why": "GitHub OAuth apps require no app review, publisher verification, or paid subscription. Developers can create apps instantly and make them accessible to external users immediately.",
+    "setupTime": "15 minutes",
+    "approvalWait": "None",
+    "approval": "none",
+    "approvalTrigger": "None",
+    "cost": "Free"
+  },
+  "oauth": {
+    "developerConsoleUrl": "https://github.com/settings/developers",
+    "docsUrl": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app",
+    "authorizeUrl": "https://github.com/login/oauth/authorize",
+    "tokenUrl": "https://github.com/login/oauth/access_token",
+    "pkce": "supported",
+    "refreshTokens": "Configurable/optional. When expiring tokens are enabled, access tokens expire in 8 hours and refresh tokens expire after 6 months of non-use with single-use rotation.",
+    "redirectUriRules": "Exact matching required by default unless wildcard matching is enabled. Desktop/CLI apps should use loopback IPs (127.0.0.1 or ::1).",
+    "scopeNotes": "Includes repo, user, gist, notifications, project, workflow, and codespace. All scopes are immediately available without platform whitelisting."
+  },
+  "prerequisites": [
+    {
+      "item": "GitHub Account",
+      "detail": "A free personal or organization account is required to register OAuth applications.",
+      "blocking": true
+    }
+  ],
+  "steps": [
+    {
+      "title": "Open GitHub Developer Settings",
+      "detail": "Navigate to Developer Settings -> OAuth Apps in your GitHub account or organization settings.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "2 minutes",
+      "url": "https://github.com/settings/developers"
+    },
+    {
+      "title": "Register OAuth Application",
+      "detail": "Click 'New OAuth App', enter Application Name, Homepage URL, and Callback URL (https://backend.composio.dev/api/v1/auth-apps/add).",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "3 minutes",
+      "url": "https://github.com/settings/applications/new"
+    },
+    {
+      "title": "Generate Client Secret",
+      "detail": "Click 'Generate a new client secret' and securely save the Client ID and Client Secret.",
+      "actor": "you",
+      "phase": "build",
+      "estimate": "2 minutes",
+      "url": ""
+    },
+    {
+      "title": "Configure Integration Credentials",
+      "detail": "Input the Client ID, Client Secret, and required scopes into your application configuration or Composio dashboard.",
+      "actor": "agent",
+      "phase": "build",
+      "estimate": "3 minutes",
+      "url": ""
+    },
+    {
+      "title": "Run Test Authorization Flow",
+      "detail": "Execute an authorization flow with PKCE enabled to confirm token exchange and API request execution.",
+      "actor": "agent",
+      "phase": "build",
+      "estimate": "5 minutes",
+      "url": ""
+    }
+  ],
+  "blockers": [
+    {
+      "blocker": "Organization OAuth Access Restrictions",
+      "likelihood": "high",
+      "howToUnblock": "OAuth app access restrictions are on by default for every new GitHub organization, so users can authorize but the token cannot see that org's private data. Ask the org owner to approve the app (Org settings \u2192 Third-party access), or tell users to request approval during authorization. Build an 'org access pending' state into your UX."
+    },
+    {
+      "blocker": "Active Token Cap (10 tokens limit)",
+      "likelihood": "low",
+      "howToUnblock": "GitHub limits active tokens to 10 per user/app/scope pair. Store and rotate existing refresh tokens instead of requesting new authorizations frequently."
+    }
+  ],
+  "gotchas": [
+    "Default access tokens do not expire unless 'Expire user access tokens' is checked in app settings or short-lived tokens/offline_access are requested.",
+    "Use loopback IP addresses (127.0.0.1 or ::1) instead of literal 'localhost' for dynamic local port redirects.",
+    "The discovery document lives under the issuer path (https://github.com/login/oauth/.well-known/openid-configuration), not at the github.com root.",
+    "GitHub recommends GitHub Apps over OAuth apps (fine-grained permissions, installation tokens); use an OAuth app when you need user-level access across orgs or enterprise resources.",
+    "OAuth apps support up to 10 callback URLs (since Aug 2026); older guides that say only one are out of date."
+  ],
+  "handoff": {
+    "agentCanDo": [
+      "Configure Client ID, Client Secret, and scopes in Composio standard setup.",
+      "Generate PKCE authorization request URLs and handle token exchange logic.",
+      "Write integration code for GitHub REST/GraphQL API interactions.",
+      "Run automated flow tests to confirm token retrieval and API calls."
+    ],
+    "youMustDo": [
+      "Log in to GitHub and register the OAuth application in Developer Settings.",
+      "Generate and copy the Client Secret from the GitHub developer console.",
+      "Approve organization access requests if prompted as an Org Owner."
+    ]
+  },
+  "claims": [
+    {
+      "claim": "Developer console is accessible at https://github.com/settings/developers.",
+      "evidence": "tested",
+      "note": "Probe P3 verified access to developer settings console via redirect wall.",
+      "sourceUrl": "https://github.com/settings/developers"
+    },
+    {
+      "claim": "Authorization endpoint is hosted at https://github.com/login/oauth/authorize.",
+      "evidence": "tested",
+      "note": "Probe P2 confirmed authorization endpoint functionality.",
+      "sourceUrl": "https://github.com/login/oauth/authorize"
+    },
+    {
+      "claim": "Token endpoint is hosted at https://github.com/login/oauth/access_token.",
+      "evidence": "tested",
+      "note": "Probe P1 confirmed token endpoint location.",
+      "sourceUrl": "https://github.com/login/oauth/access_token"
+    },
+    {
+      "claim": "GitHub publishes an OAuth discovery document at https://github.com/login/oauth/.well-known/openid-configuration (issuer https://github.com/login/oauth); it does not advertise PKCE methods.",
+      "evidence": "tested",
+      "note": "Corrected in review: the agent probed only https://github.com/.well-known (404). Re-checked by hand on 2026-11-05.",
+      "sourceUrl": "https://github.com/login/oauth/.well-known/openid-configuration"
+    },
+    {
+      "claim": "GitHub OAuth apps require no app review or manual approval before launch.",
+      "evidence": "documented",
+      "note": "OAuth apps can be created and immediately authorized by third-party users.",
+      "sourceUrl": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+    },
+    {
+      "claim": "PKCE is supported with S256 code challenge method.",
+      "evidence": "documented",
+      "note": "GitHub documentation explicitly describes PKCE parameter usage.",
+      "sourceUrl": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps"
+    },
+    {
+      "claim": "Expiring tokens expire in 8 hours and issue refresh tokens valid for 6 months.",
+      "evidence": "documented",
+      "note": "Single-use refresh token rotation is enforced when expiring tokens are active.",
+      "sourceUrl": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps"
+    },
+    {
+      "claim": "New GitHub organizations have OAuth app access restrictions enabled by default; an org owner must approve an OAuth app before it can access org resources.",
+      "evidence": "documented",
+      "note": "Added in review.",
+      "sourceUrl": "https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions"
+    },
+    {
+      "claim": "PKCE (S256) has been supported for OAuth apps and GitHub Apps since 2025-07-14.",
+      "evidence": "documented",
+      "note": "Added in review.",
+      "sourceUrl": "https://github.blog/changelog/2025-07-14-pkce-support-for-oauth-and-github-app-authentication/"
+    }
+  ],
+  "openQuestions": [
+    "Whether new OAuth apps get expiring tokens by default or only when the app opts in / requests offline_access (GitHub's Aug 2026 changelog is ambiguous)."
+  ],
+  "composioAdvice": "Composio provides a managed GitHub OAuth app, so you can ship without registering your own. Bring your own app when you need your product name on the consent screen, your own token-creation quota (GitHub allows 10 new tokens per hour per user/app, and API calls use each user's 5,000 requests/hour), or scopes beyond Composio's defaults. Either way, org owners must approve the app before it can read a new organization's private data.",
+  "sources": [
+    {
+      "title": "Creating an OAuth app - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app"
+    },
+    {
+      "title": "Authorizing OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps"
+    },
+    {
+      "title": "Scopes for OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps"
+    },
+    {
+      "title": "Rate limits for OAuth apps - GitHub Docs",
+      "url": "https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/rate-limits-for-oauth-apps"
+    }
+  ],
+  "probes": [
+    {
+      "kind": "Token endpoint (invalid code)",
+      "target": "https://github.com/login/oauth/access_token",
+      "ok": true,
+      "finding": "HTTP 404; application/json; charset=utf-8; body: {\"error\":\"Not Found\"}",
+      "at": "2026-11-05T11:37:25.144Z"
+    },
+    {
+      "kind": "Authorize endpoint (fake client_id)",
+      "target": "https://github.com/login/oauth/authorize",
+      "ok": true,
+      "finding": "HTTP 200; redirects: 302 \u2192 github.com/login; page \u201cSign in to GitHub \u00b7 GitHub\u201d; says: \u201cThere was an error while loading / Create an account [/join?return_to=%2Flogin%2Foauth%2Fauthorize%3Fclient_id%3Doauth-guide-probe-invalid-client%26redirect_uri%3Dhttps%253A%252F%252Fexample\u201d",
+      "at": "2026-11-05T11:37:25.258Z"
+    },
+    {
+      "kind": "Developer settings console",
+      "target": "https://github.com/settings/developers",
+      "ok": true,
+      "finding": "HTTP 200 after 1 redirect(s); landed on github.com/login (login wall: an account is needed) \u2014 \u201cSign in to GitHub \u00b7 GitHub\u201d",
+      "at": "2026-11-05T11:37:25.355Z"
+    },
+    {
+      "kind": "OAuth discovery document",
+      "target": "https://github.com",
+      "ok": false,
+      "finding": "No .well-known/openid-configuration or oauth-authorization-server document found (common for non-OIDC providers; not a problem by itself).",
+      "at": "2026-11-05T11:37:25.361Z"
+    }
+  ],
+  "composio": {
+    "slug": "github",
+    "name": "GitHub",
+    "logo": "https://logos.composio.dev/api/github",
+    "managedOAuth": true,
+    "authSchemes": [
+      "OAUTH2"
+    ],
+    "redirectUri": "https://backend.composio.dev/api/v1/auth-apps/add",
+    "defaultScopes": [
+      "repo",
+      "user",
+      "gist",
+      "notifications",
+      "project",
+      "workflow",
+      "codespace"
+    ],
+    "authorizeUrl": "https://github.com/login/oauth/authorize",
+    "tokenUrl": "https://github.com/login/oauth/access_token",
+    "toolsCount": 883,
+    "triggersCount": 46
+  },
+  "meta": {
+    "input": "github",
+    "generatedAt": "2026-11-05T11:38:45.295Z",
+    "model": "gemini-3.6-flash",
+    "durationSec": 85,
+    "toolCalls": 13,
+    "review": {
+      "status": "reviewed",
+      "reviewedAt": "2026-11-05",
+      "notes": [
+        "Generated live on the production site (gemini-3.6-flash, 13 tool calls, 85 s) and reviewed against the independent fact sheet.",
+        "Confirmed: no review needed, free, endpoints (probed), PKCE S256, 8 h access / 6-month refresh tokens, exact redirect matching, 10-token cap, and the org access restriction blocker.",
+        "Corrected: the agent claimed (as 'tested') that GitHub has no OAuth discovery document. It probed only the github.com root; the document exists at https://github.com/login/oauth/.well-known/openid-configuration.",
+        "Corrected: org OAuth access restrictions raised from medium to high likelihood, since they are enabled by default for new organizations.",
+        "Removed an unsourced '2,000 token requests per hour' limit from the Composio advice; replaced with GitHub's documented limits (10 new tokens/hour, 5,000 API requests/hour per user).",
+        "Added: GitHub's recommendation to prefer GitHub Apps, and the Aug 2026 change to 10 callback URLs."
+      ]
+    }
+  }
+}

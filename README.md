@@ -4,7 +4,7 @@ For any Composio toolkit, it answers two questions. Can I ship on Composio's man
 
 The library lists Composio's 100 most popular OAuth toolkits. For any other app (a name or a website), an agent researches the provider live, checks its real OAuth endpoints, and writes a guide you can share.
 
-- **Live app:** https://oauth-app-atlas.vercel.app
+- **Live app:** https://oauth-app-atlas.vercel.app · reviewed guides: [Gmail](https://oauth-app-atlas.vercel.app/apps/gmail) (Hard), [GitHub](https://oauth-app-atlas.vercel.app/apps/github) (Easy)
 - **Source:** https://github.com/Aryanshettar007/oauth-app-atlas
 - **Author:** Aryan Shettar (aryanshettar007@gmail.com, [aryanshettar.tech](https://aryanshettar.tech)). Short Technical Assessment, Product Intern, Composio
 
@@ -119,6 +119,10 @@ Stored: curated guides in data/guides/*.json (in the repo);
 | Gmail | CASA costs $540–$1,000 | Comes only from community and assessor sources; Google publishes no fee | Labelled *Community*; listed as not confirmed |
 | GitHub (run without web search) | "PKCE not supported" | PKCE (S256) supported since 2025-07-14 ([GitHub changelog](https://github.blog/changelog/2025-07-14-pkce-support-for-oauth-and-github-app-authentication)) | Wrong. This is why web search was added. |
 | GitHub (run without web search) | No mention of org access | New organizations block OAuth app access by default until an owner approves | Missed blocker |
+| GitHub (run live on production, with search) | GitHub has no OAuth discovery document (labelled *Tested*) | It exists at `github.com/login/oauth/.well-known/openid-configuration`; the agent probed only the site root | Corrected; evidence-label lesson |
+| GitHub (run live on production) | Organization OAuth access restrictions: medium likelihood | Enabled by default for every new organization ([GitHub docs](https://docs.github.com/en/organizations/managing-oauth-access-to-your-organizations-data/about-oauth-app-access-restrictions)) | Raised to high |
+| GitHub (run live on production) | Own app gives "2,000 token requests per hour" | No source; GitHub documents 10 new tokens/hour and 5,000 API requests/hour per user | Removed and replaced |
+| GitHub (run live on production) | PKCE S256, no review, 8 h / 6-month tokens, 10-token cap | Matches GitHub docs | Confirmed. With search, the earlier PKCE error didn't recur. |
 | Slack (run with search) | Since May 2025, apps not in the Marketplace get 1 request/min on `conversations.history`; Marketplace review takes up to 10 weeks and needs 10 active workspace installs; PKCE supported | Matches [Slack's changelog](https://docs.slack.dev/changelog/2025/05/29/rate-limit-changes-for-non-marketplace-apps) and the fact sheet | Confirmed |
 | HubSpot (fact sheet) | n/a | Apps on developer platform 2025.2 are capped at 25 installs until the Marketplace listing is approved ([HubSpot changelog](https://developers.hubspot.com/changelog/new-marketplace-distribution-app-install-limits)) | Spot-checked; guide not generated yet |
 
@@ -185,7 +189,7 @@ Or from the command line: `npx vercel link && npx vercel env add GEMINI_API_KEY 
 
 - **Gemini's free tier is the bottleneck.** It allows about 20 requests per model per day, and one guide uses about 10–15. The agent fails over across models, but a paid key is needed for a dependable live demo and for generating the library in bulk.
 - **Connect Vercel Blob for durable live guides.** Without `BLOB_READ_WRITE_TOKEN`, guides generated on Vercel go to `/tmp` and are lost when the instance recycles.
-- **Only Gmail is in the curated library so far.** The other seed runs hit the quota. Next: Slack, HubSpot, Salesforce, LinkedIn, and one bring-your-own toolkit (Shopify or X), each reviewed against `data/reference-facts.md`.
+- **Two reviewed guides so far: Gmail (Hard) and GitHub (Easy).** Next: Slack (Moderate), a gated or bring-your-own toolkit (LinkedIn, Shopify or X), HubSpot and Salesforce, each reviewed against `data/reference-facts.md`.
 - **Probes confirm endpoints, not approval.** Many consoles and authorize pages render in the browser or require a login, so error text often can't be read.
 - **Review is manual.** Next step: a second checker agent that re-verifies each *Documented* claim against its cited URL before a guide is published.
 - **Composio integration ideas:**
